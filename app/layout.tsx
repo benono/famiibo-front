@@ -18,7 +18,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inter.className} bg-gray-100 dark:bg-black`}>
         <nav className="hidden md:block">
-          <h1>Family Account Boook</h1>
+          <h1>Famiibo</h1>
         </nav>
         {children}
       </body>
