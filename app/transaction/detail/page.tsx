@@ -3,14 +3,28 @@
 import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import CloseIcon from '@mui/icons-material/Close'
+import AccountBalanceIcon from '@mui/icons-material/AccountBalance'
+import PaymentsIcon from '@mui/icons-material/Payments'
+import LocalAtmIcon from '@mui/icons-material/LocalAtm'
+
+interface Transaction {
+  amount: number
+  category: string
+  account: string
+}
 
 const DetailPage = () => {
   const [activeTab, setActiveTab] = useState('Income')
 
+  const transaction: Transaction = {
+    amount: 4200,
+    category: activeTab === 'Income' ? 'Salary' : 'Rent',
+    account: 'TD Bank',
+  }
   return (
     <>
-      <div className="flex flex-row items-center justify-between w-full p-4 bg-stone-800 ">
-        <CloseIcon className="cursor-pointer text-primary-foreground" />
+      <div className="flex flex-row items-center justify-between w-full py-4 bg-stone-800 ">
+        <CloseIcon className="cursor-pointer text-primary-foreground ml-2" />
         <div className="flex flex-row border-2 border-stone-700 rounded-lg">
           <div
             className={`rounded-l-lg p-2 cursor-pointer ${activeTab === 'Income' ? 'bg-gray-200' : 'bg-stone-7000 text-primary-foreground'}`}
@@ -28,17 +42,27 @@ const DetailPage = () => {
         <Button>Save</Button>
       </div>
       <div className="p-4">
-        {activeTab === 'Income' ? (
+        <div className="flex flex-row items-center justify-between py-2 border-b border-stone-700">
           <div>
-            <h2 className="text-xl font-bold">Income Details</h2>
-            <p>Details about income...</p>
+            <AccountBalanceIcon className="mr-2" />
+            Amount
           </div>
-        ) : (
+          <div>{transaction.amount}</div>
+        </div>
+        <div className="flex flex-row items-center justify-between py-2 border-b border-stone-700">
           <div>
-            <h2 className="text-xl font-bold">Expense Details</h2>
-            <p>Details about expenses...</p>
+            <PaymentsIcon className="mr-2" />
+            Category
           </div>
-        )}
+          <div>{transaction.category}</div>
+        </div>
+        <div className="flex flex-row items-center justify-between py-2 border-b border-stone-700">
+          <div>
+            <LocalAtmIcon className="mr-2" />
+            Account
+          </div>
+          <div>{transaction.account}</div>
+        </div>
       </div>
     </>
   )
