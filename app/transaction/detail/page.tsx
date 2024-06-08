@@ -27,6 +27,19 @@ const DetailPage = () => {
         </div>
         <Button>Save</Button>
       </div>
+      <div className="p-4">
+        {activeTab === 'Income' ? (
+          <div>
+            <h2 className="text-xl font-bold">Income Details</h2>
+            <p>Details about income...</p>
+          </div>
+        ) : (
+          <div>
+            <h2 className="text-xl font-bold">Expense Details</h2>
+            <p>Details about expenses...</p>
+          </div>
+        )}
+      </div>
     </>
   )
 }
