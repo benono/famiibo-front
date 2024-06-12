@@ -6,13 +6,17 @@ import CloseIcon from '@mui/icons-material/Close'
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance'
 import PaymentsIcon from '@mui/icons-material/Payments'
 import LocalAtmIcon from '@mui/icons-material/LocalAtm'
+import StoreIcon from '@mui/icons-material/Store'
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday'
 import { Input } from '@/components/ui/input'
 
 export interface Transaction {
   id: string
-  amount: number
-  category: string
-  account: string
+  amount: number | undefined
+  category: string | undefined
+  account: string | undefined
+  store: string | undefined
+  date: Date | undefined
   isIncome: boolean
 }
 
@@ -28,6 +32,8 @@ export default function Page({
     amount: 100,
     category: 'Food',
     account: 'Checking',
+    store: 'Costco',
+    date: new Date('2024-03-15'),
     isIncome: false,
   })
 
@@ -58,6 +64,26 @@ export default function Page({
       </div>
 
       <div className="p-4">
+        {/* Date */}
+        <div className="flex flex-row items-center justify-between py-2 border-b border-stone-700">
+          <div>
+            <CalendarTodayIcon className="" />
+            Date
+          </div>
+          <Input
+            type="date"
+            value={transaction.date?.toISOString().split('T')[0]}
+            className="px-0 pl-12 w-40 text-base text-right border-none focus:border-none rounded-none outline-none bg-transparent"
+            onChange={(e) =>
+              setTransaction({
+                ...transaction,
+                date: e.target.value ? new Date(e.target.value) : undefined,
+              })
+            }
+          />
+        </div>
+
+        {/* Amount */}
         <div className="flex flex-row items-center justify-between py-2 border-b border-stone-700">
           <div>
             <AccountBalanceIcon className="mr-2" />
@@ -66,11 +92,14 @@ export default function Page({
           <Input
             type="number"
             value={transaction.amount}
-            className="w-20 text-right border-none focus:border-none"
+            placeholder="EX: 100"
+            className="w-20 text-base text-right border-none focus:border-none rounded-none outline-none bg-transparent "
             onChange={(e) =>
               setTransaction({
                 ...transaction,
-                amount: parseInt(e.target.value),
+                amount: isNaN(parseInt(e.target.value))
+                  ? undefined
+                  : parseInt(e.target.value),
               })
             }
           />
@@ -84,6 +113,13 @@ export default function Page({
         </div>
         <div className="flex flex-row items-center justify-between py-2 border-b border-stone-700">
           <div>
+            <StoreIcon className="mr-2" />
+            Store
+          </div>
+          <div>{transaction.store}</div>
+        </div>
+        <div className="flex flex-row items-center justify-between py-2 border-b border-stone-700">
+          <div>
             <LocalAtmIcon className="mr-2" />
             Account
           </div>
@@ -93,6 +129,7 @@ export default function Page({
           <div>
             <div>Income</div>
             <div>{transaction.amount}</div>
+            <div>{transaction.date?.toLocaleDateString()}</div>
           </div>
         ) : null}
       </div>
