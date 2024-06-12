@@ -7,6 +7,6 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 
-export default async function Home() {
+export default async function Page() {
   return <main>This is Main</main>
 }
