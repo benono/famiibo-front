@@ -11,7 +11,7 @@ export type Currency = {
   };
 
   export type Family = {
-    id: string;
+    id: number;
     name: string;
   };
 
@@ -19,30 +19,32 @@ export type Currency = {
     id: string;
     name: string;
     email: string;
-    family_id: string;
+    family_id: number;
     password: string;
   };
   
   export type Account = {
-    id: string;
+    id: number;
+    family_id: number;
     name: string;
     currency_id: string;
   };
 
   export type Category = {
-    id: string;
+    id: number;
     name: string;
     is_expense: boolean;
   };
   
   // Add the Transaction type definition
   export type Transaction = {
-    id: string;
+    id: number;
     amount: number;
     category: string;
     account: string;
     store: string;
-    date: Date;
+    date: string;
     is_expense: boolean;
+    family_id: number;
   };
 
