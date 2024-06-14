@@ -1,8 +1,10 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import CloseIcon from '@mui/icons-material/Close'
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance'
 import PaymentsIcon from '@mui/icons-material/Payments'
 import LocalAtmIcon from '@mui/icons-material/LocalAtm'
@@ -22,7 +24,7 @@ export default function Page({
     id: Number(searchParams?.transactionId) ?? 0,
     amount: 100,
     category: 'Food',
-    account: 'Checking',
+    account: 'TD Bank',
     store: 'Costco',
     date: new Date().toISOString().split('T')[0],
     is_expense: false,
@@ -107,26 +109,48 @@ export default function Page({
             }
           />
         </div>
+        {/* Category */}
         <div className="flex flex-row items-center justify-between py-2 border-b border-stone-700">
           <div>
             <PaymentsIcon className="mr-2" />
             Category
           </div>
-          <div>{transaction.category}</div>
+          <div className="flex flex-row items-center justify-between">
+            <div>{transaction.category}</div>
+            <KeyboardArrowRightIcon />
+          </div>
         </div>
         <div className="flex flex-row items-center justify-between py-2 border-b border-stone-700">
           <div>
             <StoreIcon className="mr-2" />
             Store
           </div>
-          <div>{transaction.store}</div>
-        </div>
-        <div className="flex flex-row items-center justify-between py-2 border-b border-stone-700">
-          <div>
-            <LocalAtmIcon className="mr-2" />
-            Account
+          <div className="flex flex-row items-center justify-between">
+            <div>{transaction.store}</div>
+            <KeyboardArrowRightIcon />
           </div>
-          <div>{transaction.account}</div>
+        </div>
+        {/* Account */}
+        <div className="flex flex-row items-center justify-between py-2 border-b border-stone-700">
+          <Link
+            href={{
+              pathname: '/transaction/account',
+              query: {
+                selectedAccount: transaction.account,
+                transactionId: transaction.id,
+              },
+            }}
+            className="flex flex-row w-full items-center justify-between"
+          >
+            <div>
+              <LocalAtmIcon className="mr-2" />
+              Account
+            </div>
+            <div className="flex flex-row items-center justify-between">
+              <div>{transaction.account}</div>
+              <KeyboardArrowRightIcon />
+            </div>
+          </Link>
         </div>
 
         <div>
