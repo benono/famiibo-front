@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import CloseIcon from '@mui/icons-material/Close'
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance'
@@ -19,14 +19,26 @@ export default function Page({
   }
 }) {
   const [transaction, setTransaction] = useState<Transaction>({
-    id: searchParams?.transactionId ?? '',
+    id: Number(searchParams?.transactionId) ?? 0,
     amount: 100,
     category: 'Food',
     account: 'Checking',
     store: 'Costco',
-    date: new Date('2024-03-15'),
+    date: new Date().toISOString().split('T')[0],
     is_expense: false,
+    family_id: 1,
   })
+
+  const formatDate = (date: Date) => {
+    return date.toISOString().split('T')[0]
+  }
+
+  useEffect(() => {
+    if (searchParams?.transactionId) {
+      // ここでデータベースからトランザクションをフェッチするロジックを追加
+      // フェッチしたデータでsetTransactionを呼び出す
+    }
+  }, [searchParams?.transactionId])
 
   // TODO: Fetch transaction from database
   if (!searchParams?.transactionId) {
@@ -65,12 +77,12 @@ export default function Page({
           </div>
           <Input
             type="date"
-            value={transaction.date?.toISOString().split('T')[0]}
+            value={transaction.date}
             className="px-0 pl-12 w-40 text-base text-right border-none focus:border-none rounded-none outline-none bg-transparent"
             onChange={(e) =>
               setTransaction({
                 ...transaction,
-                date: new Date(e.target.value),
+                date: e.target.value,
               })
             }
           />
@@ -120,7 +132,7 @@ export default function Page({
         <div>
           <div>{transaction.is_expense ? 'Expense' : 'Income'}</div>
           <div>{transaction.amount}</div>
-          <div>{transaction.date?.toLocaleDateString()}</div>
+          <div>{transaction.date}</div>
         </div>
       </div>
     </>
