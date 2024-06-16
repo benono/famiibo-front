@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+import axios from 'axios'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import CloseIcon from '@mui/icons-material/Close'
@@ -18,6 +19,7 @@ export default function Page({
 }: {
   searchParams?: {
     transactionId?: string
+    selectedAccount?: string
   }
 }) {
   const [transaction, setTransaction] = useState<Transaction>({
@@ -31,16 +33,21 @@ export default function Page({
     family_id: 1,
   })
 
-  const formatDate = (date: Date) => {
-    return date.toISOString().split('T')[0]
-  }
-
   useEffect(() => {
     if (searchParams?.transactionId) {
       // ここでデータベースからトランザクションをフェッチするロジックを追加
       // フェッチしたデータでsetTransactionを呼び出す
     }
-  }, [searchParams?.transactionId])
+    if (searchParams?.selectedAccount) {
+      const fetchAccount = async () => {
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL}/accounts/${searchParams.selectedAccount}`,
+        )
+        setTransaction({ ...transaction, account: response.data.name })
+      }
+      fetchAccount()
+    }
+  }, [searchParams?.transactionId, searchParams?.selectedAccount, transaction])
 
   // TODO: Fetch transaction from database
   if (!searchParams?.transactionId) {
@@ -120,15 +127,27 @@ export default function Page({
             <KeyboardArrowRightIcon />
           </div>
         </div>
+        {/* Store(Payee) */}
         <div className="flex flex-row items-center justify-between py-2 border-b border-stone-700">
-          <div>
-            <StoreIcon className="mr-2" />
-            Store
-          </div>
-          <div className="flex flex-row items-center justify-between">
-            <div>{transaction.store}</div>
-            <KeyboardArrowRightIcon />
-          </div>
+          <Link
+            href={{
+              pathname: '/transaction/payee',
+              query: {
+                selectedPayee: transaction.store,
+                transactionId: transaction.id,
+              },
+            }}
+            className="flex flex-row w-full items-center justify-between"
+          >
+            <div>
+              <StoreIcon className="mr-2" />
+              Store
+            </div>
+            <div className="flex flex-row items-center justify-between">
+              <div>{transaction.store}</div>
+              <KeyboardArrowRightIcon />
+            </div>
+          </Link>
         </div>
         {/* Account */}
         <div className="flex flex-row items-center justify-between py-2 border-b border-stone-700">
