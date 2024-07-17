@@ -6,7 +6,12 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { Account } from './components/Account'
 
 export default async function Page() {
-  return <main>This is Main</main>
+  return (
+    <main>
+      <Account />
+    </main>
+  )
 }
