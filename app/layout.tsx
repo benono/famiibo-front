@@ -5,8 +5,7 @@ import { useEffect } from 'react'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
-import { Auth } from './components/Auth'
+import { AuthProvider } from '@/context/auth'
 import axios from 'axios'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -28,9 +27,10 @@ export default function RootLayout({
     const fetchCSRFToken = async () => {
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_API_URL}/csrf`,
+        { withCredentials: true },
       )
       const data = response.data
-      axios.defaults.headers.common['X-CSRFToken'] = data.csrfToken
+      axios.defaults.headers.common['X-CSRFToken'] = data.csrf_token
     }
     fetchCSRFToken()
   }, [])
@@ -43,9 +43,11 @@ export default function RootLayout({
         <nav className="hidden md:block">
           <h1>Famiibo</h1>
         </nav>
-        <QueryClientProvider client={queryClient}>
-          {children}
-        </QueryClientProvider>
+        <AuthProvider>
+          <QueryClientProvider client={queryClient}>
+            {children}
+          </QueryClientProvider>
+        </AuthProvider>
       </body>
     </html>
   )
