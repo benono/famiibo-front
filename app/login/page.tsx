@@ -17,7 +17,11 @@ export default function Page() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     try {
-      const response = await apiClient.post('/auth/login', { email, password })
+      const response = await apiClient.post(
+        '/auth/login',
+        { email, password },
+        { withCredentials: true },
+      )
       const token = response.data.token
       login(token)
       router.push('/')
