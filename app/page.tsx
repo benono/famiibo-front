@@ -1,17 +1,13 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { NavBar } from './components/NavBar'
 import { Account } from './components/Account'
 
 export default async function Page() {
   return (
-    <main>
-      <Account />
-    </main>
+    <>
+      <NavBar />
+      <main>
+        <Account />
+      </main>
+    </>
   )
 }
