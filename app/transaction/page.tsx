@@ -12,7 +12,9 @@ import LocalAtmIcon from '@mui/icons-material/LocalAtm'
 import StoreIcon from '@mui/icons-material/Store'
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday'
 import { Input } from '@/components/ui/input'
-import { Transaction } from '@/app/lib/util/definitions'
+import { Textarea } from '@/components/ui/textarea'
+import { TransactionInput, TransactionType } from '@/app/lib/types'
+import apiClient from '@/app/lib/apiClient'
 
 export default function Page({
   searchParams,
@@ -22,16 +24,32 @@ export default function Page({
     selectedAccount?: string
   }
 }) {
-  const [transaction, setTransaction] = useState<Transaction>({
-    id: Number(searchParams?.transactionId) ?? 0,
-    amount: 100,
-    category: 'Food',
-    account: 'TD Bank',
-    store: 'Costco',
+  const [transaction, setTransaction] = useState<TransactionInput>({
+    id: null,
+    amount: null,
+    accountId: 1,
+    accountName: 'TD Bank',
+    categoryId: 1,
+    categoryName: 'Food',
+    payeeId: 1,
+    payeeName: 'Costco',
+    currencyId: 1,
+    currencyCode: 'USD',
     date: new Date().toISOString().split('T')[0],
-    is_expense: false,
-    family_id: 1,
+    type: TransactionType.WITHDRAWAL,
+    description: '',
   })
+
+  const saveTransaction = async () => {
+    try {
+      const response = await apiClient.post(`/transactions`, transaction, {
+        withCredentials: true,
+      })
+      console.log(response)
+    } catch (error) {
+      console.error(error)
+    }
+  }
 
   useEffect(() => {
     if (searchParams?.transactionId) {
@@ -43,16 +61,20 @@ export default function Page({
         const response = await axios.get(
           `${process.env.NEXT_PUBLIC_API_URL}/accounts/${searchParams.selectedAccount}`,
         )
-        setTransaction({ ...transaction, account: response.data.name })
+        setTransaction({
+          ...transaction,
+          accountName: response.data.name,
+          accountId: response.data.id,
+        })
       }
       fetchAccount()
     }
   }, [searchParams?.transactionId, searchParams?.selectedAccount, transaction])
 
   // TODO: Fetch transaction from database
-  if (!searchParams?.transactionId) {
+  /* if (!searchParams?.transactionId) {
     return <div>No transaction ID</div>
-  }
+  } */
 
   return (
     <>
@@ -60,21 +82,29 @@ export default function Page({
         <CloseIcon className="cursor-pointer text-primary-foreground ml-2" />
         <div className="flex flex-row border-2 border-stone-700 rounded-lg">
           <div
-            className={`rounded-l-lg p-2 cursor-pointer ${transaction.is_expense ? 'bg-stone-7000 text-primary-foreground' : 'bg-gray-200'}`}
+            className={`rounded-l-lg p-2 cursor-pointer ${transaction.type === TransactionType.WITHDRAWAL ? 'bg-stone-7000 text-primary-foreground' : 'bg-gray-200'}`}
             onClick={() =>
-              setTransaction({ ...transaction, is_expense: false })
+              setTransaction({
+                ...transaction,
+                type: TransactionType.WITHDRAWAL,
+              })
             }
           >
             Income
           </div>
           <div
-            className={`rounded-r-lg p-2 cursor-pointer ${transaction.is_expense ? 'bg-gray-200' : 'bg-stone-7000 text-primary-foreground'}`}
-            onClick={() => setTransaction({ ...transaction, is_expense: true })}
+            className={`rounded-r-lg p-2 cursor-pointer ${transaction.type === TransactionType.WITHDRAWAL ? 'bg-gray-200' : 'bg-stone-7000 text-primary-foreground'}`}
+            onClick={() =>
+              setTransaction({
+                ...transaction,
+                type: TransactionType.WITHDRAWAL,
+              })
+            }
           >
             Expense
           </div>
         </div>
-        <Button>Save</Button>
+        <Button onClick={() => saveTransaction()}>Save</Button>
       </div>
 
       <div className="p-4">
@@ -105,7 +135,7 @@ export default function Page({
           </div>
           <Input
             type="number"
-            value={transaction.amount}
+            value={transaction.amount ?? ''}
             placeholder="EX: 100"
             className="w-20 text-base text-right border-none focus:border-none rounded-none outline-none bg-transparent "
             onChange={(e) =>
@@ -123,7 +153,7 @@ export default function Page({
             Category
           </div>
           <div className="flex flex-row items-center justify-between">
-            <div>{transaction.category}</div>
+            <div>{transaction.categoryName}</div>
             <KeyboardArrowRightIcon />
           </div>
         </div>
@@ -133,7 +163,7 @@ export default function Page({
             href={{
               pathname: '/transaction/payee',
               query: {
-                selectedPayee: transaction.store,
+                selectedPayee: transaction.payeeId,
                 transactionId: transaction.id,
               },
             }}
@@ -144,7 +174,7 @@ export default function Page({
               Store
             </div>
             <div className="flex flex-row items-center justify-between">
-              <div>{transaction.store}</div>
+              <div>{transaction.payeeName}</div>
               <KeyboardArrowRightIcon />
             </div>
           </Link>
@@ -155,7 +185,7 @@ export default function Page({
             href={{
               pathname: '/transaction/account',
               query: {
-                selectedAccount: transaction.account,
+                selectedAccount: transaction.accountId,
                 transactionId: transaction.id,
               },
             }}
@@ -166,16 +196,24 @@ export default function Page({
               Account
             </div>
             <div className="flex flex-row items-center justify-between">
-              <div>{transaction.account}</div>
+              <div>{transaction.accountName}</div>
               <KeyboardArrowRightIcon />
             </div>
           </Link>
         </div>
-
-        <div>
-          <div>{transaction.is_expense ? 'Expense' : 'Income'}</div>
-          <div>{transaction.amount}</div>
-          <div>{transaction.date}</div>
+        {/* input description */}
+        <div className="pt-6 h-[30vh]">
+          <Textarea
+            value={transaction.description}
+            className="w-full h-full"
+            placeholder="Description"
+            onChange={(e) =>
+              setTransaction({
+                ...transaction,
+                description: e.target.value,
+              })
+            }
+          />
         </div>
       </div>
     </>
