@@ -12,9 +12,9 @@ export const Footer: React.FC = () => {
   const [selected, setSelected] = useState(0)
 
   const links = [
-    { href: '/accounts', icon: EditCalendar, label: '入力' },
+    { href: '/', icon: EditCalendar, label: 'Transaction' },
     { href: '/accounts', icon: AccountBalanceIcon, label: 'Account' },
-    { href: '/accounts', icon: AddIcon, label: 'Add' },
+    { href: '/transaction', icon: AddIcon, label: 'Add' },
     { href: '/categories', icon: PieChart, label: 'Analyze' },
     { href: '/settings', icon: SettingsIcon, label: 'Settings' },
   ]
@@ -38,40 +38,6 @@ export const Footer: React.FC = () => {
             <span className="text-[10px]">{link.label}</span>
           </Link>
         ))}
-        {/* <Link href="/accounts" className="flex flex-col items-center">
-          <EditCalendar
-            className={cn(
-              'text-stone-500',
-              selected === 0 && 'text-primary-foreground',
-            )}
-          />
-          <span className="text-[10px]">入力</span>
-        </Link>
-
-        <Link
-          href="/accounts"
-          className="flex flex-col items-center"
-          onClick={() => setSelected(1)}
-        >
-          <AccountBalanceIcon
-            className={cn('text-stone-500', selected === 1 && 'text-red-500')}
-          />
-          <span className="text-[10px]">Account</span>
-        </Link>
-        <Link href="/accounts" className="flex flex-col items-center">
-          <AddIcon className="text-red-500" />
-          <span className="text-[10px]">Add</span>
-        </Link>
-
-        <Link href="/categories" className="flex flex-col items-center">
-          <PieChart className="text-stone-500" />
-          <span className="text-[10px]">Analyze</span>
-        </Link>
-        <Link href="/settings" className="flex flex-col items-center">
-          <SettingsIcon className="text-stone-500" />
-          <span className="text-[10px]">Settings</span>
-        </Link>
- */}{' '}
       </div>
     </footer>
   )
