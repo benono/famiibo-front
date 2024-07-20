@@ -10,11 +10,12 @@ import Link from 'next/link'
 import apiClient from '@/app/lib/apiClient'
 import { useState, useEffect } from 'react'
 import { AxiosError } from 'axios'
+import { TransactionParams } from '@/app/lib/types'
 
 export default function Page({
   searchParams,
 }: {
-  searchParams: { accountId: string }
+  searchParams: TransactionParams
 }) {
   const [accountList, setAccountList] = useState<Account[]>([])
   const router = useRouter()
@@ -51,9 +52,7 @@ export default function Page({
         <Link
           href={{
             pathname: '/transaction',
-            query: {
-              accountId: searchParams.accountId,
-            },
+            query: { ...searchParams },
           }}
           className="text-white"
         >
@@ -70,6 +69,7 @@ export default function Page({
             href={{
               pathname: '/transaction',
               query: {
+                ...searchParams,
                 accountId: account.id,
                 accountName: account.name,
                 currencyId: account.currency?.id,

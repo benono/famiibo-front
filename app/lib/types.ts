@@ -1,8 +1,9 @@
 export interface Account {
-  id: string
+  id: number
   name: string
   balance: number
-  currency: Currency
+  currencyId: number
+  currency: Currency | null
 }
 
 export interface Accounts {
@@ -77,6 +78,16 @@ export interface TransactionInput {
   categoryName: string
   payeeId: number
   payeeName: string
+}
+
+export interface TransactionParams {
+  transactionId?: string
+  accountId?: string
+  accountName?: string
+  currencyId?: string
+  currencyCode?: string
+  payeeId?: string
+  payeeName?: string
 }
 
 export enum TransactionType {

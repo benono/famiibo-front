@@ -12,19 +12,18 @@ import StoreIcon from '@mui/icons-material/Store'
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { TransactionInput, TransactionType } from '@/app/lib/types'
+import {
+  TransactionInput,
+  TransactionType,
+  TransactionParams,
+} from '@/app/lib/types'
+
 import apiClient from '@/app/lib/apiClient'
 
 export default function Page({
   searchParams,
 }: {
-  searchParams?: {
-    transactionId?: string
-    accountId?: string
-    accountName?: string
-    currencyId?: string
-    currencyCode?: string
-  }
+  searchParams?: TransactionParams
 }) {
   const [transaction, setTransaction] = useState<TransactionInput>({
     id: null,
@@ -44,9 +43,7 @@ export default function Page({
 
   const saveTransaction = async () => {
     try {
-      const response = await apiClient.post(`/transactions`, transaction, {
-        withCredentials: true,
-      })
+      const response = await apiClient.post(`/transactions`, transaction)
       console.log(response)
     } catch (error) {
       console.error(error)
@@ -63,9 +60,11 @@ export default function Page({
     setTransaction({
       ...transaction,
       accountId: Number(searchParams?.accountId) ?? 1,
-      accountName: searchParams?.accountName ?? '',
+      accountName: searchParams?.accountName ?? 'TD Bank',
       currencyId: Number(searchParams?.currencyId) ?? 1,
-      currencyCode: searchParams?.currencyCode ?? '',
+      currencyCode: searchParams?.currencyCode ?? 'CAD',
+      payeeId: Number(searchParams?.payeeId) ?? 1,
+      payeeName: searchParams?.payeeName ?? 'Costco',
     })
   }, [searchParams, transaction])
 
@@ -160,10 +159,7 @@ export default function Page({
           <Link
             href={{
               pathname: '/transaction/payee',
-              query: {
-                selectedPayee: transaction.payeeId,
-                transactionId: transaction.id,
-              },
+              query: { ...searchParams },
             }}
             className="flex flex-row w-full items-center justify-between"
           >
@@ -182,10 +178,7 @@ export default function Page({
           <Link
             href={{
               pathname: '/transaction/account',
-              query: {
-                accountId: transaction.accountId,
-                transactionId: transaction.id,
-              },
+              query: { ...searchParams },
             }}
             className="flex flex-row w-full items-center justify-between"
           >
