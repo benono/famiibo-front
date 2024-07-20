@@ -1,7 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-import axios from 'axios'
+import React, { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import CloseIcon from '@mui/icons-material/Close'
@@ -21,7 +20,10 @@ export default function Page({
 }: {
   searchParams?: {
     transactionId?: string
-    selectedAccount?: string
+    accountId?: string
+    accountName?: string
+    currencyId?: string
+    currencyCode?: string
   }
 }) {
   const [transaction, setTransaction] = useState<TransactionInput>({
@@ -50,26 +52,22 @@ export default function Page({
       console.error(error)
     }
   }
-
+  const once = useRef(true)
   useEffect(() => {
+    if (!once.current) return
+    once.current = false
     if (searchParams?.transactionId) {
       // ここでデータベースからトランザクションをフェッチするロジックを追加
       // フェッチしたデータでsetTransactionを呼び出す
     }
-    if (searchParams?.selectedAccount) {
-      const fetchAccount = async () => {
-        const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}/accounts/${searchParams.selectedAccount}`,
-        )
-        setTransaction({
-          ...transaction,
-          accountName: response.data.name,
-          accountId: response.data.id,
-        })
-      }
-      fetchAccount()
-    }
-  }, [searchParams?.transactionId, searchParams?.selectedAccount, transaction])
+    setTransaction({
+      ...transaction,
+      accountId: Number(searchParams?.accountId) ?? 1,
+      accountName: searchParams?.accountName ?? '',
+      currencyId: Number(searchParams?.currencyId) ?? 1,
+      currencyCode: searchParams?.currencyCode ?? '',
+    })
+  }, [searchParams, transaction])
 
   // TODO: Fetch transaction from database
   /* if (!searchParams?.transactionId) {
@@ -185,7 +183,7 @@ export default function Page({
             href={{
               pathname: '/transaction/account',
               query: {
-                selectedAccount: transaction.accountId,
+                accountId: transaction.accountId,
                 transactionId: transaction.id,
               },
             }}
