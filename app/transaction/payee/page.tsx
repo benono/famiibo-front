@@ -7,36 +7,38 @@ import { Button } from '@/components/ui/button'
 import { Store } from '@/app/lib/util/definitions'
 
 import Link from 'next/link'
-import axios from 'axios'
+import apiClient from '@/app/lib/apiClient'
 import { useState, useEffect } from 'react'
+import { AxiosError } from 'axios'
+import { useRouter } from 'next/navigation'
+import { TransactionParams } from '@/app/lib/types'
 
 export default function Page({
   searchParams,
 }: {
-  searchParams: { selectedPayee: string; transactionId: string }
+  searchParams: TransactionParams
 }) {
-  // TODO
-  //const accountList = await fetchAccountList()
-
   const [storeList, setStoreList] = useState<Store[]>([])
+  const router = useRouter()
 
   useEffect(() => {
     const fetchPayeeList = async () => {
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}/payees`,
-      )
-      setStoreList(response.data)
+      try {
+        const response = await apiClient.get(`/payees/`)
+        setStoreList(response.data)
+      } catch (error) {
+        if (error instanceof AxiosError && error.response?.status === 401) {
+          router.push('/login')
+          alert('You are not logged in.')
+          return
+        }
+        alert('Error')
+      }
     }
     fetchPayeeList()
   }, [])
 
-  //   [
-  //     { id: 1, name: 'TD Bank' },
-  //     { id: 2, name: '三井住友銀行' },
-  //     { id: 3, name: 'SONY銀行' },
-  //   ]
-
-  const payeeId = searchParams.selectedPayee
+  const payeeId = searchParams.payeeId
 
   return (
     <>
@@ -44,7 +46,7 @@ export default function Page({
         <Link
           href={{
             pathname: '/transaction',
-            query: { transactionId: searchParams.transactionId },
+            query: { ...searchParams },
           }}
           className="text-white"
         >
@@ -61,8 +63,9 @@ export default function Page({
             href={{
               pathname: '/transaction',
               query: {
-                transactionId: searchParams.transactionId,
-                selectedStore: store.id,
+                ...searchParams,
+                payeeId: store.id,
+                payeeName: store.name,
               },
             }}
             className="text-black"
@@ -72,9 +75,7 @@ export default function Page({
                 <AccountBalanceIcon className="mr-2" />
                 {store.name}
               </div>
-              {/* TODO FIX TO ID */}
-              {/* {account.name === accountId && ( */}
-              {store.id === Number(payeeId) && (
+              {store.id === Number(searchParams.payeeId) && (
                 <div>
                   <CheckIcon />
                 </div>
