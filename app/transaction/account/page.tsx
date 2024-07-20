@@ -4,58 +4,56 @@ import AccountBalanceIcon from '@mui/icons-material/AccountBalance'
 import CheckIcon from '@mui/icons-material/Check'
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos'
 import { Button } from '@/components/ui/button'
-import { Account } from '@/app/lib/util/definitions'
-
+import { Account } from '@/app/lib/types'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import axios from 'axios'
+import apiClient from '@/app/lib/apiClient'
 import { useState, useEffect } from 'react'
+import { AxiosError } from 'axios'
 
 export default function Page({
   searchParams,
 }: {
-  searchParams: { selectedAccount: string; transactionId: string }
+  searchParams: { accountId: string }
 }) {
-  // TODO
-  //const accountList = await fetchAccountList()
-  const fetchPayeeList = async () => {
-    const response = await axios.get(
-      `${process.env.NEXT_PUBLIC_API_URL}/payees`,
-    )
-    return response.data
-  }
-
-  const fetchAccountList = async () => {
-    const response = await axios.get<Account[]>(
-      `${process.env.NEXT_PUBLIC_API_URL}/accounts`,
-    )
-    return response.data
-  }
-
   const [accountList, setAccountList] = useState<Account[]>([])
+  const router = useRouter()
 
   useEffect(() => {
     const fetchAccounts = async () => {
-      const accounts = await fetchAccountList()
-      setAccountList(accounts)
+      try {
+        const response = await apiClient.get<Account[]>(`/accounts/`)
+        if (response.data) {
+          setAccountList(response.data)
+        }
+      } catch (error) {
+        if (error instanceof AxiosError && error.response?.status === 401) {
+          router.push('/login')
+          alert('You are not logged in.')
+          return
+        }
+        alert('Error')
+      }
     }
-
     fetchAccounts()
-  }, [])
+  }, [searchParams.accountId, router])
 
-  //   [
-  //     { id: 1, name: 'TD Bank' },
-  //     { id: 2, name: '三井住友銀行' },
-  //     { id: 3, name: 'SONY銀行' },
-  //   ]
+  useEffect(() => {
+    const accountName = accountList.find(
+      (account) => account.id === Number(searchParams.accountId),
+    )?.name
+    console.log(accountName)
+  }, [accountList, searchParams.accountId])
 
-  const accountId = searchParams.selectedAccount
   return (
     <>
       <div className="flex flex-row items-center justify-between w-full py-4 bg-stone-800 ">
         <Link
           href={{
             pathname: '/transaction',
-            query: { transactionId: searchParams.transactionId },
+            query: {
+              accountId: searchParams.accountId,
+            },
           }}
           className="text-white"
         >
@@ -72,8 +70,10 @@ export default function Page({
             href={{
               pathname: '/transaction',
               query: {
-                transactionId: searchParams.transactionId,
-                selectedAccount: account.id,
+                accountId: account.id,
+                accountName: account.name,
+                currencyId: account.currency?.id,
+                currencyCode: account.currency?.code,
               },
             }}
             className="text-black"
@@ -83,9 +83,7 @@ export default function Page({
                 <AccountBalanceIcon className="mr-2" />
                 {account.name}
               </div>
-              {/* TODO FIX TO ID */}
-              {/* {account.name === accountId && ( */}
-              {account.name === accountId && (
+              {account.id === Number(searchParams.accountId) && (
                 <div>
                   <CheckIcon />
                 </div>
