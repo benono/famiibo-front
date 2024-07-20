@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import CloseIcon from '@mui/icons-material/Close'
@@ -11,41 +11,68 @@ import LocalAtmIcon from '@mui/icons-material/LocalAtm'
 import StoreIcon from '@mui/icons-material/Store'
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday'
 import { Input } from '@/components/ui/input'
-import { Transaction } from '@/app/lib/util/definitions'
+import { Textarea } from '@/components/ui/textarea'
+import { TransactionInput, TransactionType } from '@/app/lib/types'
+import apiClient from '@/app/lib/apiClient'
 
 export default function Page({
   searchParams,
 }: {
   searchParams?: {
     transactionId?: string
+    accountId?: string
+    accountName?: string
+    currencyId?: string
+    currencyCode?: string
   }
 }) {
-  const [transaction, setTransaction] = useState<Transaction>({
-    id: Number(searchParams?.transactionId) ?? 0,
-    amount: 100,
-    category: 'Food',
-    account: 'TD Bank',
-    store: 'Costco',
+  const [transaction, setTransaction] = useState<TransactionInput>({
+    id: null,
+    amount: null,
+    accountId: 1,
+    accountName: 'TD Bank',
+    categoryId: 1,
+    categoryName: 'Food',
+    payeeId: 1,
+    payeeName: 'Costco',
+    currencyId: 1,
+    currencyCode: 'USD',
     date: new Date().toISOString().split('T')[0],
-    is_expense: false,
-    family_id: 1,
+    type: TransactionType.WITHDRAWAL,
+    description: '',
   })
 
-  const formatDate = (date: Date) => {
-    return date.toISOString().split('T')[0]
+  const saveTransaction = async () => {
+    try {
+      const response = await apiClient.post(`/transactions`, transaction, {
+        withCredentials: true,
+      })
+      console.log(response)
+    } catch (error) {
+      console.error(error)
+    }
   }
-
+  const once = useRef(true)
   useEffect(() => {
+    if (!once.current) return
+    once.current = false
     if (searchParams?.transactionId) {
       // ここでデータベースからトランザクションをフェッチするロジックを追加
       // フェッチしたデータでsetTransactionを呼び出す
     }
-  }, [searchParams?.transactionId])
+    setTransaction({
+      ...transaction,
+      accountId: Number(searchParams?.accountId) ?? 1,
+      accountName: searchParams?.accountName ?? '',
+      currencyId: Number(searchParams?.currencyId) ?? 1,
+      currencyCode: searchParams?.currencyCode ?? '',
+    })
+  }, [searchParams, transaction])
 
   // TODO: Fetch transaction from database
-  if (!searchParams?.transactionId) {
+  /* if (!searchParams?.transactionId) {
     return <div>No transaction ID</div>
-  }
+  } */
 
   return (
     <>
@@ -53,21 +80,29 @@ export default function Page({
         <CloseIcon className="cursor-pointer text-primary-foreground ml-2" />
         <div className="flex flex-row border-2 border-stone-700 rounded-lg">
           <div
-            className={`rounded-l-lg p-2 cursor-pointer ${transaction.is_expense ? 'bg-stone-7000 text-primary-foreground' : 'bg-gray-200'}`}
+            className={`rounded-l-lg p-2 cursor-pointer ${transaction.type === TransactionType.WITHDRAWAL ? 'bg-stone-7000 text-primary-foreground' : 'bg-gray-200'}`}
             onClick={() =>
-              setTransaction({ ...transaction, is_expense: false })
+              setTransaction({
+                ...transaction,
+                type: TransactionType.WITHDRAWAL,
+              })
             }
           >
             Income
           </div>
           <div
-            className={`rounded-r-lg p-2 cursor-pointer ${transaction.is_expense ? 'bg-gray-200' : 'bg-stone-7000 text-primary-foreground'}`}
-            onClick={() => setTransaction({ ...transaction, is_expense: true })}
+            className={`rounded-r-lg p-2 cursor-pointer ${transaction.type === TransactionType.WITHDRAWAL ? 'bg-gray-200' : 'bg-stone-7000 text-primary-foreground'}`}
+            onClick={() =>
+              setTransaction({
+                ...transaction,
+                type: TransactionType.WITHDRAWAL,
+              })
+            }
           >
             Expense
           </div>
         </div>
-        <Button>Save</Button>
+        <Button onClick={() => saveTransaction()}>Save</Button>
       </div>
 
       <div className="p-4">
@@ -98,7 +133,7 @@ export default function Page({
           </div>
           <Input
             type="number"
-            value={transaction.amount}
+            value={transaction.amount ?? ''}
             placeholder="EX: 100"
             className="w-20 text-base text-right border-none focus:border-none rounded-none outline-none bg-transparent "
             onChange={(e) =>
@@ -116,19 +151,31 @@ export default function Page({
             Category
           </div>
           <div className="flex flex-row items-center justify-between">
-            <div>{transaction.category}</div>
+            <div>{transaction.categoryName}</div>
             <KeyboardArrowRightIcon />
           </div>
         </div>
+        {/* Store(Payee) */}
         <div className="flex flex-row items-center justify-between py-2 border-b border-stone-700">
-          <div>
-            <StoreIcon className="mr-2" />
-            Store
-          </div>
-          <div className="flex flex-row items-center justify-between">
-            <div>{transaction.store}</div>
-            <KeyboardArrowRightIcon />
-          </div>
+          <Link
+            href={{
+              pathname: '/transaction/payee',
+              query: {
+                selectedPayee: transaction.payeeId,
+                transactionId: transaction.id,
+              },
+            }}
+            className="flex flex-row w-full items-center justify-between"
+          >
+            <div>
+              <StoreIcon className="mr-2" />
+              Store
+            </div>
+            <div className="flex flex-row items-center justify-between">
+              <div>{transaction.payeeName}</div>
+              <KeyboardArrowRightIcon />
+            </div>
+          </Link>
         </div>
         {/* Account */}
         <div className="flex flex-row items-center justify-between py-2 border-b border-stone-700">
@@ -136,7 +183,7 @@ export default function Page({
             href={{
               pathname: '/transaction/account',
               query: {
-                selectedAccount: transaction.account,
+                accountId: transaction.accountId,
                 transactionId: transaction.id,
               },
             }}
@@ -147,16 +194,24 @@ export default function Page({
               Account
             </div>
             <div className="flex flex-row items-center justify-between">
-              <div>{transaction.account}</div>
+              <div>{transaction.accountName}</div>
               <KeyboardArrowRightIcon />
             </div>
           </Link>
         </div>
-
-        <div>
-          <div>{transaction.is_expense ? 'Expense' : 'Income'}</div>
-          <div>{transaction.amount}</div>
-          <div>{transaction.date}</div>
+        {/* input description */}
+        <div className="pt-6 h-[30vh]">
+          <Textarea
+            value={transaction.description}
+            className="w-full h-full"
+            placeholder="Description"
+            onChange={(e) =>
+              setTransaction({
+                ...transaction,
+                description: e.target.value,
+              })
+            }
+          />
         </div>
       </div>
     </>

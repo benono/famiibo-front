@@ -4,46 +4,39 @@ import AccountBalanceIcon from '@mui/icons-material/AccountBalance'
 import CheckIcon from '@mui/icons-material/Check'
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos'
 import { Button } from '@/components/ui/button'
-import { Account } from '@/app/lib/types'
-import { useRouter } from 'next/navigation'
+import { Store } from '@/app/lib/util/definitions'
+
 import Link from 'next/link'
-import apiClient from '@/app/lib/apiClient'
+import axios from 'axios'
 import { useState, useEffect } from 'react'
-import { AxiosError } from 'axios'
 
 export default function Page({
   searchParams,
 }: {
-  searchParams: { accountId: string }
+  searchParams: { selectedPayee: string; transactionId: string }
 }) {
-  const [accountList, setAccountList] = useState<Account[]>([])
-  const router = useRouter()
+  // TODO
+  //const accountList = await fetchAccountList()
+
+  const [storeList, setStoreList] = useState<Store[]>([])
 
   useEffect(() => {
-    const fetchAccounts = async () => {
-      try {
-        const response = await apiClient.get<Account[]>(`/accounts/`)
-        if (response.data) {
-          setAccountList(response.data)
-        }
-      } catch (error) {
-        if (error instanceof AxiosError && error.response?.status === 401) {
-          router.push('/login')
-          alert('You are not logged in.')
-          return
-        }
-        alert('Error')
-      }
+    const fetchPayeeList = async () => {
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/payees`,
+      )
+      setStoreList(response.data)
     }
-    fetchAccounts()
-  }, [searchParams.accountId, router])
+    fetchPayeeList()
+  }, [])
 
-  useEffect(() => {
-    const accountName = accountList.find(
-      (account) => account.id === Number(searchParams.accountId),
-    )?.name
-    console.log(accountName)
-  }, [accountList, searchParams.accountId])
+  //   [
+  //     { id: 1, name: 'TD Bank' },
+  //     { id: 2, name: '三井住友銀行' },
+  //     { id: 3, name: 'SONY銀行' },
+  //   ]
+
+  const payeeId = searchParams.selectedPayee
 
   return (
     <>
@@ -51,9 +44,7 @@ export default function Page({
         <Link
           href={{
             pathname: '/transaction',
-            query: {
-              accountId: searchParams.accountId,
-            },
+            query: { transactionId: searchParams.transactionId },
           }}
           className="text-white"
         >
@@ -64,16 +55,14 @@ export default function Page({
         <Button>Edit</Button>
       </div>
       <div className="p-4">
-        {accountList.map((account) => (
+        {storeList.map((store) => (
           <Link
-            key={account.id}
+            key={store.id}
             href={{
               pathname: '/transaction',
               query: {
-                accountId: account.id,
-                accountName: account.name,
-                currencyId: account.currency?.id,
-                currencyCode: account.currency?.code,
+                transactionId: searchParams.transactionId,
+                selectedStore: store.id,
               },
             }}
             className="text-black"
@@ -81,9 +70,11 @@ export default function Page({
             <div className="flex flex-row items-center justify-between py-2 border-b border-stone-700">
               <div className="flex flex-row items-center justify-between">
                 <AccountBalanceIcon className="mr-2" />
-                {account.name}
+                {store.name}
               </div>
-              {account.id === Number(searchParams.accountId) && (
+              {/* TODO FIX TO ID */}
+              {/* {account.name === accountId && ( */}
+              {store.id === Number(payeeId) && (
                 <div>
                   <CheckIcon />
                 </div>
