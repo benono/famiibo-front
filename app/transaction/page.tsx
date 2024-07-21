@@ -62,7 +62,7 @@ export default function Page({
             onClick={() =>
               setTransaction({
                 ...transaction,
-                type: TransactionType.WITHDRAWAL,
+                type: TransactionType.DEPOSIT,
               })
             }
           >
