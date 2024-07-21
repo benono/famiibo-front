@@ -17,7 +17,7 @@ import {
   TransactionType,
   TransactionParams,
 } from '@/app/lib/types'
-
+import { useRouter } from 'next/navigation'
 import apiClient from '@/app/lib/apiClient'
 
 export default function Page({
@@ -28,23 +28,24 @@ export default function Page({
   const [transaction, setTransaction] = useState<TransactionInput>({
     id: null,
     amount: Number(searchParams?.amount) ?? undefined,
-    accountId: Number(searchParams?.accountId) ?? 1,
+    accountId: searchParams?.accountId ? Number(searchParams.accountId) : 1,
     accountName: searchParams?.accountName ?? 'TD Bank',
-    categoryId: Number(searchParams?.categoryId) ?? 1,
+    categoryId: searchParams?.categoryId ? Number(searchParams.categoryId) : 1,
     categoryName: searchParams?.categoryName ?? 'Food',
-    payeeId: Number(searchParams?.payeeId) ?? 1,
+    payeeId: searchParams?.payeeId ? Number(searchParams.payeeId) : 1,
     payeeName: searchParams?.payeeName ?? 'Costco',
-    currencyId: Number(searchParams?.currencyId) ?? 1,
-    currencyCode: searchParams?.currencyCode ?? 'USD',
+    currencyId: searchParams?.currencyId ? Number(searchParams.currencyId) : 1,
+    currencyCode: searchParams?.currencyCode ?? 'JPY',
     date: searchParams?.date ?? new Date().toISOString().split('T')[0],
     type: searchParams?.type ?? TransactionType.WITHDRAWAL,
     description: searchParams?.description ?? '',
   })
+  const router = useRouter()
 
   const saveTransaction = async () => {
     try {
       const response = await apiClient.post(`/transactions`, transaction)
-      console.log(response)
+      router.push(`/transaction/${response.data.id}`)
     } catch (error) {
       console.error(error)
     }

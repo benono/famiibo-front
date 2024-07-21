@@ -17,7 +17,7 @@ import {
   TransactionType,
   TransactionParams,
 } from '@/app/lib/types'
-
+import { useRouter } from 'next/navigation'
 import apiClient from '@/app/lib/apiClient'
 
 export default function Page({
@@ -43,13 +43,11 @@ export default function Page({
     categoryName: searchParams?.categoryName ?? 'Food',
   })
 
+  const router = useRouter()
   const saveTransaction = async () => {
     try {
-      const response = await apiClient.put(
-        `/transactions/${transaction.id}`,
-        transaction,
-      )
-      console.log(response)
+      await apiClient.put(`/transactions/${transaction.id}`, transaction)
+      router.push('/')
     } catch (error) {
       console.error(error)
     }
