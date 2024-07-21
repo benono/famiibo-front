@@ -22,28 +22,33 @@ import apiClient from '@/app/lib/apiClient'
 
 export default function Page({
   searchParams,
+  params,
 }: {
   searchParams?: TransactionParams
+  params: { id: string }
 }) {
   const [transaction, setTransaction] = useState<TransactionInput>({
-    id: null,
+    id: Number(params.id),
     amount: Number(searchParams?.amount) ?? undefined,
-    accountId: Number(searchParams?.accountId) ?? 1,
-    accountName: searchParams?.accountName ?? 'TD Bank',
-    categoryId: Number(searchParams?.categoryId) ?? 1,
-    categoryName: searchParams?.categoryName ?? 'Food',
-    payeeId: Number(searchParams?.payeeId) ?? 1,
-    payeeName: searchParams?.payeeName ?? 'Costco',
-    currencyId: Number(searchParams?.currencyId) ?? 1,
-    currencyCode: searchParams?.currencyCode ?? 'USD',
     date: searchParams?.date ?? new Date().toISOString().split('T')[0],
     type: searchParams?.type ?? TransactionType.WITHDRAWAL,
     description: searchParams?.description ?? '',
+    accountId: Number(searchParams?.accountId) ?? 1,
+    accountName: searchParams?.accountName ?? 'TD Bank',
+    currencyId: Number(searchParams?.currencyId) ?? 1,
+    currencyCode: searchParams?.currencyCode ?? 'CAD',
+    payeeId: Number(searchParams?.payeeId) ?? 1,
+    payeeName: searchParams?.payeeName ?? 'Costco',
+    categoryId: Number(searchParams?.categoryId) ?? 1,
+    categoryName: searchParams?.categoryName ?? 'Food',
   })
 
   const saveTransaction = async () => {
     try {
-      const response = await apiClient.post(`/transactions`, transaction)
+      const response = await apiClient.put(
+        `/transactions/${transaction.id}`,
+        transaction,
+      )
       console.log(response)
     } catch (error) {
       console.error(error)
@@ -102,7 +107,6 @@ export default function Page({
             }
           />
         </div>
-
         {/* Amount */}
         <div className="flex flex-row items-center justify-between py-2 border-b border-stone-700">
           <div>
