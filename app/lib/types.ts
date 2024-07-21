@@ -26,6 +26,7 @@ export interface Category {
   id: number
   order: number
   name: string
+  type: CategoryType
   familyId: number
   family: Family | null
   createById: number
@@ -66,7 +67,7 @@ export interface Transaction {
 
 export interface TransactionInput {
   id: number | null
-  amount: number | null
+  amount: number | undefined
   type: TransactionType
   date: string
   description: string
@@ -82,10 +83,16 @@ export interface TransactionInput {
 
 export interface TransactionParams {
   transactionId?: string
+  amount?: number
+  date?: string
+  type?: TransactionType
+  description?: string
   accountId?: string
   accountName?: string
   currencyId?: string
   currencyCode?: string
+  categoryId?: string
+  categoryName?: string
   payeeId?: string
   payeeName?: string
 }
@@ -94,4 +101,9 @@ export enum TransactionType {
   DEPOSIT = 'DEPOSIT',
   WITHDRAWAL = 'WITHDRAWAL',
   TRANSFER = 'TRANSFER',
+}
+
+export enum CategoryType {
+  EXPENSE = 'EXPENSE',
+  INCOME = 'INCOME',
 }
